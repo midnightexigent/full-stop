@@ -1,21 +1,32 @@
-#[derive(thiserror::Error, Debug)]
+use thiserror::Error;
+
+#[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    ReadConfig(#[from] ReadConfig),
+    IntoUtf8PathBuf(#[from] camino::FromPathBufError),
     #[error(transparent)]
-    RelativePathError(#[from] relative_path::FromPathError),
+    RelativePath(#[from] relative_path::FromPathError),
     #[error(transparent)]
-    ReadConfigFile(#[from] std::io::Error),
+    Ignore(#[from] ignore::Error),
     #[error(transparent)]
-    GlobSet(#[from] globset::Error),
+    GlobPattern(#[from] glob::PatternError),
+    #[error(transparent)]
+    Glob(#[from] glob::GlobError),
+    #[error(transparent)]
+    ShellExpandLookup(#[from] shellexpand::LookupError<Box<Error>>),
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error(transparent)]
+    SerializeToml(#[from] toml::ser::Error),
+    #[error(transparent)]
+    DeserializeToml(#[from] toml::de::Error),
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum ReadConfig {
-    #[error("Invalid module name: '{0}'")]
-    InvalidModuleName(String),
-    #[error(transparent)]
-    ParseToml(#[from] toml::de::Error),
-    #[error(transparent)]
-    OpenFile(#[from] std::io::Error),
+impl From<shellexpand::LookupError<Error>> for Error {
+    fn from(error: shellexpand::LookupError<Error>) -> Self {
+        Self::ShellExpandLookup(shellexpand::LookupError {
+            var_name: error.var_name,
+            cause: Box::new(error.cause),
+        })
+    }
 }
