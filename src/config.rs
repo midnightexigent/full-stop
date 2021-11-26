@@ -31,10 +31,7 @@ pub fn init() -> crate::Result<()> {
         ) {
             modules.push(Module {
                 name: module_name.to_string(),
-                includes: vec![Include {
-                    glob: path.to_string(),
-                    prefix_strip: None,
-                }],
+                includes: vec![path.to_string()],
                 destination: format!("$CONFIG_DIR/{}", module_name),
             })
         }
@@ -55,11 +52,5 @@ pub struct Config {
 pub struct Module {
     pub name: String,
     pub destination: String,
-    pub includes: Vec<Include>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Include {
-    pub glob: String,
-    pub prefix_strip: Option<usize>,
+    pub includes: Vec<String>,
 }

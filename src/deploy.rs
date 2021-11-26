@@ -14,14 +14,8 @@ pub fn get_env(name: &str) -> crate::Result<Option<String>> {
 }
 
 #[derive(Debug)]
-pub struct Source {
-    pub path: PathBuf,
-    pub skip: usize,
-}
-
-#[derive(Debug)]
 pub struct Deploy {
-    pub sources: Vec<Source>,
+    pub sources: Vec<PathBuf>,
     pub destination: PathBuf,
 }
 
@@ -29,11 +23,8 @@ impl Deploy {
     pub fn from_config(module: crate::config::Module) -> crate::Result<Self> {
         let mut sources = Vec::new();
         for include in module.includes {
-            for path in glob::glob(&include.glob)? {
-                sources.push(Source {
-                    path: path?,
-                    skip: include.prefix_strip.unwrap_or(1),
-                })
+            for path in glob::glob(include.as_str())? {
+                sources.push(path?);
             }
         }
 
@@ -48,11 +39,16 @@ impl Deploy {
     }
     pub fn copy(&self) -> crate::Result<()> {
         for source in &self.sources {
-            let from = &source.path;
+            let from = source;
             let to = self
                 .destination
-                .join(from.components().skip(source.skip).collect::<PathBuf>());
-            println!("copy from {} to {}", from.display(), to.display())
+                .join(from.components().skip(1).collect::<PathBuf>());
+            println!("{} => {}", from.display(), to.display());
+            // if let Some(to) = to.parent() {
+            //     if to.exists() {
+            //         std::fs::create_dir_all(to)?;
+            //     }
+            // }
             // std::fs::copy(from, to)?;
         }
         Ok(())
