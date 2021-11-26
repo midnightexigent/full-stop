@@ -3,10 +3,6 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    IntoUtf8PathBuf(#[from] camino::FromPathBufError),
-    #[error(transparent)]
-    RelativePath(#[from] relative_path::FromPathError),
-    #[error(transparent)]
     Ignore(#[from] ignore::Error),
     #[error(transparent)]
     GlobPattern(#[from] glob::PatternError),

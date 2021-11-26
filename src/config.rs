@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
 
 const CONFIG_FILE: &str = "fus.toml";
 
@@ -24,11 +25,17 @@ pub fn init() -> crate::Result<()> {
         })
     {
         let entry = result?;
-        let path = relative_path::RelativePath::from_path(entry.path())?;
-        if let Some(module_name) = path.file_name() {
+        let path = entry.path();
+        if let (Some(module_name), Some(path)) = (
+            path.file_name().and_then(|file_name| file_name.to_str()),
+            path.to_str(),
+        ) {
             modules.push(Module {
                 name: module_name.to_string(),
-                includes: vec![path.to_string()],
+                includes: vec![Include {
+                    glob: path.to_string(),
+                    prefix_strip: None,
+                }],
                 destination: format!("$CONFIG_DIR/{}", module_name),
             })
         }
@@ -48,6 +55,12 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Module {
     pub name: String,
-    pub includes: Vec<String>,
     pub destination: String,
+    pub includes: Vec<Include>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Include {
+    pub glob: String,
+    pub prefix_strip: Option<usize>,
 }

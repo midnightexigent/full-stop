@@ -44,12 +44,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "camino"
-version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52d74260d9bf6944e2208aa46841b4b8f0d7ffc0849a06837b2f510337f86b2b"
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -147,12 +141,10 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 name = "full-stop"
 version = "0.1.0"
 dependencies = [
- "camino",
  "clap",
  "dirs",
  "glob",
  "ignore",
- "relative-path",
  "serde",
  "shellexpand",
  "thiserror",
@@ -360,15 +352,6 @@ name = "regex-syntax"
 version = "0.6.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
-
-[[package]]
-name = "relative-path"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9629de8974fd69c97684736786b807edd3da456d3e3f95341dd9d4cbd8f5ad6"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "same-file"
