@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn get_env(name: &str) -> crate::Result<Option<String>> {
     let path = match name {
