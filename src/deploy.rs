@@ -20,16 +20,11 @@ pub struct Deploy {
 }
 
 impl Deploy {
-    pub fn from_config(module: crate::config::Module) -> crate::Result<Self> {
-        let mut sources = Vec::new();
-        for include in module.includes {
-            for path in glob::glob(include.as_str())? {
-                sources.push(path?);
-            }
-        }
+    pub fn from_config(include: crate::config::Include) -> crate::Result<Self> {
+        let sources = glob::glob(include.pattern.as_str())?.collect::<Result<_, _>>()?;
 
         let destination = PathBuf::from(
-            shellexpand::full_with_context(&module.destination, dirs::home_dir, get_env)?
+            shellexpand::full_with_context(&include.destination, dirs::home_dir, get_env)?
                 .to_string(),
         );
         Ok(Self {
