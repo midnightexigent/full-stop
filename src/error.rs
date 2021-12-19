@@ -3,6 +3,8 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
+    WalkDir(#[from] walkdir::Error),
+    #[error(transparent)]
     Ignore(#[from] ignore::Error),
     #[error(transparent)]
     GlobPattern(#[from] glob::PatternError),

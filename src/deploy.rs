@@ -21,7 +21,32 @@ pub struct Deploy {
 
 impl Deploy {
     pub fn from_config(include: crate::config::Include) -> crate::Result<Self> {
-        let sources = glob::glob(include.pattern.as_str())?.collect::<Result<_, _>>()?;
+        let paths = glob::glob(include.pattern.as_str())?.collect::<Result<Vec<_>, _>>()?;
+
+        let mut sources = Vec::new();
+        for path in paths {
+            if path.is_dir() {
+                let mut files = walkdir::WalkDir::new(path)
+                    .into_iter()
+                    .filter_map(|e| {
+                        e.map(|e| {
+                            let e = e.into_path();
+                            if e.is_dir() {
+                                None
+                            } else {
+                                Some(e)
+                            }
+                        })
+                        .transpose()
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
+                sources.append(&mut files)
+            } else {
+                sources.push(path);
+            }
+        }
+        sources.sort();
+        sources.dedup();
 
         let destination = PathBuf::from(
             shellexpand::full_with_context(&include.destination, dirs::home_dir, get_env)?
@@ -39,12 +64,12 @@ impl Deploy {
                 .destination
                 .join(from.components().skip(1).collect::<PathBuf>());
             println!("{} => {}", from.display(), to.display());
-            // if let Some(to) = to.parent() {
-            //     if to.exists() {
-            //         std::fs::create_dir_all(to)?;
-            //     }
-            // }
-            // std::fs::copy(from, to)?;
+            if let Some(to) = to.parent() {
+                if !to.exists() {
+                    std::fs::create_dir_all(to)?;
+                }
+            }
+            std::fs::copy(from, to)?;
         }
         Ok(())
     }
